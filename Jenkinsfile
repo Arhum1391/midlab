@@ -17,6 +17,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'midlab-api'
         CONTAINER_NAME = 'mlops-api'
+        BRANCH_NAME= 'main'
     }
 
     stages {
