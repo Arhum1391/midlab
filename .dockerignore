@@ -1,0 +1,15 @@
+.git
+.gitignore
+.github
+Jenkinsfile
+README.md
+**/__pycache__
+**/*.pyc
+.venv
+.jenkins-venv
+dataset
+configs
+generate_dataset.py
+train.py
+config.json
+*.md

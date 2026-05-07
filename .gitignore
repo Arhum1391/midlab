@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+.jenkins-venv/
+*.egg-info/
+.pytest_cache/
+
+# Training artifacts (produced on Jenkins or locally before docker build)
+model.pkl
+metrics.json
