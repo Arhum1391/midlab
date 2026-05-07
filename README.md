@@ -1,6 +1,6 @@
 # Midterm ML pipeline (FA23-BAI-006)
 
-Repository for CSC413 lab midterms: GitHub stores `dataset/train.csv`; Jenkins on EC2 retrains, rebuilds Docker, and serves FastAPI on port **8000** (`GET /metrics`).
+Repository for CSC413 lab midterm: GitHub stores `dataset/train.csv`; Jenkins on EC2 retrains, rebuilds Docker, and serves FastAPI on port **8000** (`GET /metrics`).
 
 ## Layout
 
