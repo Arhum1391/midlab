@@ -29,8 +29,52 @@ docker run --rm -p 8000:8000 midlab-api:test
 1. **Security group:** inbound TCP **8000** from the internet (or evaluator IP if restricted).
 2. **Jenkins:** install Git, Python 3, Docker, `curl`. Add user `jenkins` to group `docker`, then restart Jenkins (`sudo usermod -aG docker jenkins`).
 3. **Job:** New Item → Pipeline → Pipeline script from SCM → Git URL of this repo → branch `main` → Script Path `Jenkinsfile`.
-4. **Webhook (recommended):** GitHub repo → Settings → Webhooks → Payload URL `http://YOUR_JENKINS:8080/github-webhook/` (or your Multibranch webhook URL). In the job, enable “GitHub hook trigger for GITScm polling” if using that plugin.
+4. **GitHub webhook (required for auto-build on push):** see section below.
 5. **Public API URL for the form:** `http://YOUR_EC2_PUBLIC_IP:8000/metrics` (or HTTPS if you terminate TLS elsewhere).
+
+## GitHub webhook + Jenkins settings
+
+### Plugins (Manage Jenkins → Plugins)
+
+Install if missing:
+
+- **GitHub Integration** (often named **GitHub** / `github` plugin) — provides `/github-webhook/` and the “GitHub hook trigger for GITScm polling” option.
+- **Git** — Pipeline checkout from GitHub.
+
+Restart Jenkins after installing plugins.
+
+### Jenkins job (Pipeline from SCM)
+
+1. **New Item** → **Pipeline** → name your job → OK.
+2. Under **Pipeline**, choose **Pipeline script from SCM**.
+3. **SCM:** Git. **Repository URL:** your `midlab` repo HTTPS or SSH URL.
+4. **Credentials:** add GitHub PAT or SSH key if the repo is private.
+5. **Branch specifier:** `*/main`.
+6. **Script Path:** `Jenkinsfile`.
+7. Under **Build Triggers**, check **GitHub hook trigger for GITScm polling** (wording may be slightly different depending on plugin version).
+8. Save the job.
+
+Optional but helpful: under the job’s **General** section, if you see **GitHub project**, set **Project url** to `https://github.com/OWNER/REPO/` so Jenkins links builds to the repo.
+
+### EC2 network for webhooks
+
+- GitHub must reach Jenkins on **port 8080** (or whatever you use). Open that port in the **EC2 security group** from **GitHub’s IPs** (narrow) or temporarily from `0.0.0.0/0` for testing — tighten later if your org allows.
+- If Jenkins is only on `localhost`, use a **reverse proxy + HTTPS** or **Tailscale**/VPN; GitHub cannot call `http://127.0.0.1:8080/...`.
+
+### GitHub repository
+
+1. Repo → **Settings** → **Webhooks** → **Add webhook**.
+2. **Payload URL:** `http://YOUR_EC2_PUBLIC_DNS_OR_IP:8080/github-webhook/`  
+   (Use `https://` if Jenkins is behind HTTPS.)
+3. **Content type:** `application/json`.
+4. **Events:** “Just the push event” (or “Let me select…” and enable **Pushes**).
+5. **Active:** checked → **Add webhook**.
+
+After a push to `main`, GitHub POSTs to Jenkins; the job should queue within seconds. Use **Recent Deliveries** on the webhook to debug HTTP errors (401/403/404/timeout).
+
+### If webhooks are blocked
+
+Use **Polling SCM** on the job with a schedule (e.g. `H/5 * * * *`) only as a fallback — your instructor expects near-immediate retrains after they push; webhook is the right default.
 
 ## Config copy note
 

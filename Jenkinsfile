@@ -1,17 +1,17 @@
 // EC2/Linux agent: requires Git, Python 3, Docker, and curl.
 // Add the Jenkins user to the docker group (or use sudo docker in sh steps).
 // Open EC2 security group inbound TCP 8000 for the evaluator.
+//
+// Builds are triggered by GitHub push webhooks (not pollSCM). In Jenkins, enable
+// "GitHub hook trigger for GITScm polling" on this job, and in GitHub add a webhook
+// to http://YOUR_JENKINS_HOST:8080/github-webhook/ (Payload: application/json,
+// events: Just the push event). See README.md for full steps.
 
 pipeline {
     agent any
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
-    }
-
-    // Remove pollSCM if you rely only on GitHub "Push event" webhook to Jenkins.
-    triggers {
-        pollSCM('H/3 * * * *')
     }
 
     environment {
